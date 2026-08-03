@@ -9,8 +9,22 @@ A reusable Laravel media library for uploads, metadata, downloads, polymorphic a
 
 ## Installation
 
+Install directly from the public Git repository:
+
+```bash
+composer config repositories.wenprise-media-library vcs https://github.com/wenprise/laravel-media-library.git
+composer require wenprise/laravel-media-library:^0.1
+```
+
+After the package is listed on Packagist, the repository configuration is no longer required:
+
 ```bash
 composer require wenprise/laravel-media-library
+```
+
+Publish the Laravel resources:
+
+```bash
 php artisan vendor:publish --tag=media-library-config
 php artisan vendor:publish --tag=media-library-migrations
 php artisan migrate
