@@ -1,0 +1,55 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * 创建可复用媒体库和多态附件表。
+ */
+return new class extends Migration
+{
+    /**
+     * 创建媒体库数据表。
+     */
+    public function up(): void
+    {
+        Schema::create(config('media-library.tables.media'), function (Blueprint $table): void {
+            $table->id();
+            $table->string('disk')->default('public');
+            $table->string('path')->unique();
+            $table->string('original_name');
+            $table->string('title')->nullable();
+            $table->string('mime_type');
+            $table->string('kind')->index();
+            $table->unsignedBigInteger('size');
+            $table->unsignedInteger('width')->nullable();
+            $table->unsignedInteger('height')->nullable();
+            $table->json('alt_text')->nullable();
+            $table->text('description')->nullable();
+            $table->unsignedBigInteger('uploaded_by')->nullable()->index();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create(config('media-library.tables.attachments'), function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('media_asset_id')->constrained(config('media-library.tables.media'))->restrictOnDelete();
+            $table->morphs('attachable');
+            $table->string('collection')->index();
+            $table->boolean('is_primary')->default(false);
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->timestamps();
+            $table->unique(['media_asset_id', 'attachable_type', 'attachable_id', 'collection'], 'media_attachment_unique');
+        });
+    }
+
+    /**
+     * 删除媒体库数据表。
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists(config('media-library.tables.attachments'));
+        Schema::dropIfExists(config('media-library.tables.media'));
+    }
+};
